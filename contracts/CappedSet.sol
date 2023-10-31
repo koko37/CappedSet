@@ -23,7 +23,10 @@ contract CappedSet {
         uint256 value
     ) public returns (address newLowestAddress, uint256 newLowestValue) {
         require(addr != address(0) && value != 0, "invalid element");
-        require(!valueTree.exists(value), "already exists");
+        require(
+            addresses[value] == address(0) && values[addr] == 0,
+            "already exists"
+        );
 
         uint256 lowestValue = valueTree.first();
         require(value > lowestValue || numElements < cap, "too low value");
@@ -38,9 +41,7 @@ contract CappedSet {
             numElements++;
         }
 
-        valueTree.insert(value);
-        values[addr] = value;
-        addresses[value] = addr;
+        _insertElement(addr, value);
 
         newLowestAddress = value > lowestValue ? addresses[lowestValue] : addr;
         newLowestValue = value > lowestValue ? lowestValue : value;
@@ -61,10 +62,30 @@ contract CappedSet {
 
     function update(
         address addr,
-        uint256 newVal
-    ) public returns (address newLowestAddress, uint256 newLowestValue) {}
+        uint256 newValue
+    ) public returns (address newLowestAddress, uint256 newLowestValue) {
+        require(addr != address(0) && newValue != 0, "invalid element");
 
-    function getValue(address addr) public view returns (uint256) {}
+        uint256 oldValue = values[addr];
+        require(oldValue != 0, "invalid element");
+        require(oldValue != newValue, "no changes");
+
+        _removeElement(oldValue);
+        _insertElement(addr, newValue);
+
+        newLowestValue = valueTree.first();
+        newLowestAddress = addresses[newLowestValue];
+    }
+
+    function getValue(address addr) public view returns (uint256) {
+        return values[addr];
+    }
+
+    function _insertElement(address addr, uint256 value) internal {
+        valueTree.insert(value);
+        values[addr] = value;
+        addresses[value] = addr;
+    }
 
     function _removeElement(uint256 value) internal {
         address _address = addresses[value];
