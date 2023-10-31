@@ -15,6 +15,7 @@ contract CappedSet {
     uint256 public numElements;
 
     constructor(uint256 _cap) {
+        require(_cap != 0, "wrong cap");
         cap = _cap;
     }
 
