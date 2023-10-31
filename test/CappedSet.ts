@@ -123,9 +123,97 @@ describe("CappedSet", function () {
     });
   });
 
-  describe("Remove", function () {});
+  describe("getValue", function () {
+    it("Should return correct value", async function () {
+      const { contract } = await loadFixture(deployCappedSetFixture);
+      const [addr1, addr2] = await ethers.getSigners();
 
-  describe("Update", function () {});
+      await contract.insert(addr1.address, 10);
+      await contract.insert(addr2.address, 9);
 
-  describe("getValue", function () {});
+      expect(await contract.getValue(ethers.ZeroAddress)).to.equal(0);
+      expect(await contract.getValue(addr2.address)).to.equal(9);
+      expect(await contract.getValue(addr1.address)).to.equal(10);
+    });
+  });
+
+  describe("Remove", function () {
+    it("Should reject if address is invalid", async function () {
+      const { contract } = await loadFixture(deployCappedSetFixture);
+      const [addr1, addr2] = await ethers.getSigners();
+
+      await contract.insert(addr1.address, 1);
+      await expect(contract.remove(ethers.ZeroAddress)).to.be.revertedWith(
+        "invalid element"
+      );
+      await expect(contract.remove(addr2.address)).to.be.revertedWith(
+        "no exists"
+      );
+    });
+
+    it("Should remove element correctly", async function () {
+      const { contract, wrapperContract } = await loadFixture(
+        deployCappedSetFixture
+      );
+      const [addr1, addr2] = await ethers.getSigners();
+
+      await contract.insert(addr1.address, 6);
+      await contract.insert(addr2.address, 8);
+      expect(await contract.numElements()).to.equal(2);
+      expect(await contract.getValue(addr2.address)).to.equal(8);
+
+      await expect(wrapperContract.remove(addr2.address))
+        .to.emit(wrapperContract, "Removed")
+        .withArgs(addr1.address, 6);
+      expect(await contract.numElements()).to.equal(1);
+      expect(await contract.getValue(addr2.address)).to.equal(0);
+    });
+  });
+
+  describe("Update", function () {
+    it("Should reject if address or value is invalid", async function () {
+      const { contract } = await loadFixture(
+        deployCappedSetFixture
+      );
+      const [addr1] = await ethers.getSigners();
+
+      await expect(contract.update(ethers.ZeroAddress, 1)).to.be.revertedWith(
+        "invalid element"
+      );
+      await expect(contract.update(addr1.address, 0)).to.be.revertedWith(
+        "invalid element"
+      );
+      await expect(contract.update(addr1.address, 2)).to.be.revertedWith(
+        "no exists"
+      );
+      await contract.insert(addr1.address, 6);
+      await expect(contract.update(addr1.address, 6)).to.be.revertedWith(
+        "no changes"
+      );
+    });
+
+    it("Should update value correctly", async function () {
+      const { contract, wrapperContract } = await loadFixture(
+        deployCappedSetFixture
+      );
+      const [addr1, addr2] = await ethers.getSigners();
+
+      await contract.insert(addr1.address, 6);
+      await expect(wrapperContract.insert(addr2.address, 8))
+        .to.emit(wrapperContract, "Inserted")
+        .withArgs(addr1.address, 6);
+      expect(await contract.getValue(addr1.address)).to.equal(6);
+			expect(await contract.numElements()).to.equal(2);
+
+      // can't update another existing value
+      await expect(contract.update(addr1.address, 8)).to.be.revertedWith(
+        "value exists"
+      );
+      await expect(wrapperContract.update(addr1.address, 16))
+        .to.emit(wrapperContract, "Updated")
+        .withArgs(addr2.address, 8);
+      expect(await contract.getValue(addr1.address)).to.equal(16);
+			expect(await contract.numElements()).to.equal(2);
+    });
+  });
 });

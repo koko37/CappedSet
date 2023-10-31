@@ -54,9 +54,11 @@ contract CappedSet {
         require(addr != address(0), "invalid element");
 
         uint256 value = values[addr];
-        require(value != 0, "invalid element");
+        require(value != 0, "no exists");
 
         _removeElement(value);
+        numElements--;
+
         newLowestValue = valueTree.first();
         newLowestAddress = addresses[newLowestValue];
     }
@@ -68,8 +70,10 @@ contract CappedSet {
         require(addr != address(0) && newValue != 0, "invalid element");
 
         uint256 oldValue = values[addr];
-        require(oldValue != 0, "invalid element");
+        require(oldValue != 0, "no exists");
         require(oldValue != newValue, "no changes");
+
+        require(addresses[newValue] == address(0), "value exists");
 
         _removeElement(oldValue);
         _insertElement(addr, newValue);

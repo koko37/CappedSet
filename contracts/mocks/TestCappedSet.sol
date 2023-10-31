@@ -25,4 +25,19 @@ contract TestCappedSet {
         );
         emit Inserted(newLowestAddress, newLowestValue);
     }
+
+    function remove(address addr) public {
+        (address newLowestAddress, uint256 newLowestValue) = cappedSet.remove(
+            addr
+        );
+        emit Removed(newLowestAddress, newLowestValue);
+    }
+
+    function update(address addr, uint256 newValue) public {
+        (address newLowestAddress, uint256 newLowestValue) = cappedSet.update(
+            addr,
+            newValue
+        );
+        emit Updated(newLowestAddress, newLowestValue);
+    }
 }
