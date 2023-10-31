@@ -1,7 +1,12 @@
 // SPDX-License-Identifier: UNLICENSED
 pragma solidity ^0.8.9;
 
+import "./BokkyPooBahsRedBlackTreeLibrary.sol";
+
 contract CappedSet {
+    using BokkyPooBahsRedBlackTreeLibrary for BokkyPooBahsRedBlackTreeLibrary.Tree;
+
+    BokkyPooBahsRedBlackTreeLibrary.Tree valueTree;
     uint256 public numElements;
 
     constructor(uint256 _numElements) {
