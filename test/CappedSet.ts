@@ -6,12 +6,12 @@ import { anyValue } from "@nomicfoundation/hardhat-chai-matchers/withArgs";
 import { expect } from "chai";
 import { ethers } from "hardhat";
 
-const CAP_SIZE = 4;
+const TEST_CAP = 4;
 
 describe("CappedSet", function () {
   async function deployCappedSetFixture() {
     const CappedSet = await ethers.getContractFactory("CappedSet");
-    const contract = await CappedSet.deploy(CAP_SIZE);
+    const contract = await CappedSet.deploy(TEST_CAP);
 
     // it has no way to read return value of non-view/non-pure function from off-chain
     // so it uses wrapper contract that emits the result as event
@@ -31,7 +31,7 @@ describe("CappedSet", function () {
       const { contract } = await loadFixture(deployCappedSetFixture);
       const cap = await contract.cap();
 
-      expect(cap).to.equal(CAP_SIZE);
+      expect(cap).to.equal(TEST_CAP);
     });
   });
 

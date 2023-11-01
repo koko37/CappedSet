@@ -8,9 +8,13 @@ Try running some of the following tasks:
 ```shell
 npx hardhat test
 REPORT_GAS=true npx hardhat test
-npx hardhat node
-npx hardhat run scripts/deploy.ts
+
+npx hardhat --network goerli run scripts/deploy.ts
+npx hardhat --network goerli verify --contract "contracts/CappedSet.sol:CappedSet" 0xf43587B709Cd6E523495C718C2c499eCAC94ba51 5
 ```
+
+## Contract Addresses
+[0xf43587B709Cd6E523495C718C2c499eCAC94ba51](https://goerli.etherscan.io/address/0xf43587B709Cd6E523495C718C2c499eCAC94ba51)
 
 ## Major Files
 ```
